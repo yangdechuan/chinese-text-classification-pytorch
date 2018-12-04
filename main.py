@@ -31,9 +31,6 @@ EMBEDDING_DIM = int(cfg["model"]["embedding_dim"])
 
 
 def train():
-    # Build vocabulary dict.
-    make_data(train_file=TRAIN_FILE, result_dir=RESULT_DIR)
-
     device = torch.device("cuda" if torch.cuda.is_available() and USE_CUDA else "cpu")
 
     if not os.path.exists(MODEL_DIR):
@@ -121,12 +118,14 @@ def predict(epoch_idx):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", type=str, default="train", choices=["train", "predict"])
+    parser.add_argument("--mode", type=str, default="preprocess", choices=["preprocess", "train", "predict"])
     parser.add_argument("--epoch-idx", type=int, default=1)
 
     args = parser.parse_args()
 
-    if args.mode == "train":
+    if args.mode == "preprocess":
+        make_data(train_file=TRAIN_FILE, result_dir=RESULT_DIR)
+    elif args.mode == "train":
         train()
     else:
         predict(args.epoch_idx)
