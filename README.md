@@ -27,3 +27,11 @@ python main.py --mode train
 ```
 python main.py --mode predict --epoch-idx 10
 ```
+
+## File Description
+* `cnn.py` includes CNN text classifier.
+* `utils.py` contains function and class regarding loading and batching data.
+* `main.py` for preprocess, train or predict.
+* `data/`: dataset dir
+* `models/`: saved models dir
+* `results/`: vocab dict file and predict result file dir
