@@ -17,7 +17,7 @@ A PyTorch Implementation of Chinese Text Classification.
 python main.py --mode preprocess
 ```
 * Step4: Train model.
-Model will be saved in `./models/` folders
+    * Model will be saved in `./models/` folders
 ```
 python main.py --mode train
 ```
