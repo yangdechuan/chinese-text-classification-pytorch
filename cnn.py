@@ -36,6 +36,6 @@ class CNNTextModel(nn.Module):
 
         x = torch.cat((x1, x2, x3), dim=1)  # (N, 300)
         x = self.dropout(x)
-        logit = self.fc(x)  # (N, C)
+        logits = self.fc(x)  # (N, C)
 
-        return logit
+        return logits
