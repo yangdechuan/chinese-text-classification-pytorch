@@ -4,7 +4,7 @@ A PyTorch Implementation of Chinese Text Classification.
 ## Requirement
 * python3
 * pytorch >= 0.4
-Follow setup steps in https://pytorch.org/
+** Follow setup steps in https://pytorch.org/
 * jieba
 * numpy
 * pandas
@@ -21,9 +21,7 @@ Model will be saved in `./models/` folders
 ```
 python main.py --mode train
 ```
-* Step5: Predict labels with saved model.
-`epoch_idx` is the saved model's epoch id
-labels will be saved in `./results/` folder
+* Step5: Predict labels with saved model. `epoch_idx` is the saved model's epoch id. And labels will be saved in `./results/` folder.
 ```
 python main.py --mode predict --epoch-idx 10
 ```
