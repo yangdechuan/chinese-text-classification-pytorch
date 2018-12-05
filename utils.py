@@ -86,10 +86,10 @@ def load_data(file, max_len=100, min_count=10, result_dir="results"):
     return X, y, vocab_size
 
 
-class ImdbDataset(Dataset):
+class CustomDataset(Dataset):
     """Custom Dataset for PyTorch."""
     def __init__(self, file, max_len=100, min_count=10, result_dir="results"):
-        super(ImdbDataset, self).__init__()
+        super(CustomDataset, self).__init__()
         self.X, self.y, self.vocab_size = load_data(file,
                                                     max_len=max_len,
                                                     min_count=min_count,

@@ -7,7 +7,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
-from utils import ImdbDataset, make_data, load_data
+from utils import CustomDataset, make_data, load_data
 from cnn import CNNTextModel
 
 cfg = configparser.ConfigParser()
@@ -38,11 +38,11 @@ def train():
 
     # Load data.
     print("Load data...")
-    train_dataset = ImdbDataset(file=TRAIN_FILE,
+    train_dataset = CustomDataset(file=TRAIN_FILE,
                                 max_len=MAX_LEN,
                                 min_count=MIN_COUNT,
                                 result_dir=RESULT_DIR)
-    test_dataset = ImdbDataset(file=TEST_FILE,
+    test_dataset = CustomDataset(file=TEST_FILE,
                                max_len=MAX_LEN,
                                min_count=MIN_COUNT,
                                result_dir=RESULT_DIR)
