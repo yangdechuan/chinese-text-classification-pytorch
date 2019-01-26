@@ -78,7 +78,7 @@ def train():
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            if batch % 20 == 0:
+            if batch % 30 == 0:
                 print("epoch {}, batch {}/{}, train loss {}".format(epoch, batch, batch_num, loss.item()))
             batch += 1
         checkpoint_path = os.path.join(MODEL_DIR, "model_epoch_{}.ckpt".format(epoch))

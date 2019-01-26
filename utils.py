@@ -28,7 +28,12 @@ def make_data(train_file, result_dir="results", text_col_name="text"):
         os.mkdir(result_dir)
     dic_filepath = os.path.join(result_dir, "vocab.txt")
 
-    df = pd.read_csv(train_file)
+    if train_file[-4:] == ".csv":
+        df = pd.read_csv(train_file)
+    elif train_file[-5:] == ".xlsx":
+        df = pd.read_excel(train_file)
+    else:
+        raise ValueError
 
     vocab2num = Counter()
     lengths = []
@@ -72,7 +77,14 @@ def load_data(file, max_len=100, min_count=10, result_dir="results", text_col_na
         vocabs = [line.split()[0] for line in fr.readlines() if int(line.split()[1]) >= min_count]
     vocab2idx = {vocab: idx for idx, vocab in enumerate(vocabs)}
     vocab_size = len(vocabs)
-    df = pd.read_csv(file)
+
+    if file[-4:] == ".csv":
+        df = pd.read_csv(file)
+    elif file[-5:] == ".xlsx":
+        df = pd.read_excel(file)
+    else:
+        raise ValueError
+
     x_list = []
     for sentence in df[text_col_name].values:
         sentence = _clean_str(sentence)
@@ -84,13 +96,19 @@ def load_data(file, max_len=100, min_count=10, result_dir="results", text_col_na
     X = np.array(x_list, dtype=np.int64)
     print("{} Data size {}".format("Train" if "train" in file else "Test",  len(X)))
 
-    y = df[label_col_name].values.astype(np.int64) if "label" in df.columns else None
+    y = df[label_col_name].values.astype(np.int64) if label_col_name in df.columns else None
+
     return X, y, vocab_size
 
 
 class CustomDataset(Dataset):
     """Custom Dataset for PyTorch."""
-    def __init__(self, file, max_len=100, min_count=10, result_dir="results", text_col_name="text", label_col_name="label"):
+    def __init__(self, file,
+                 max_len=100,
+                 min_count=10,
+                 result_dir="results",
+                 text_col_name="text",
+                 label_col_name="label"):
         super(CustomDataset, self).__init__()
         self.X, self.y, self.vocab_size = load_data(file,
                                                     max_len=max_len,
