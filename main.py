@@ -11,15 +11,17 @@ from utils import CustomDataset, make_data, load_data
 from cnn import CNNTextModel
 
 cfg = configparser.ConfigParser()
-cfg.read("settings.ini")
+cfg.read("settings.ini", encoding="utf-8")
 
 TRAIN_FILE = cfg["file"]["train_file"].replace("/", os.path.sep)
 TEST_FILE = cfg["file"]["test_file"].replace("/", os.path.sep)
 PREDICT_FILE = cfg["file"]["predict_file"].replace("/", os.path.sep)
 MODEL_DIR = cfg["file"]["model_dir"].replace("/", os.path.sep)
 RESULT_DIR = cfg["file"]["result_dir"].replace("/", os.path.sep)
+TEXT_COL_NAME = cfg["file"]["text_col_name"]
+LABEL_COL_NAME = cfg["file"]["text_col_name"]
 
-USE_CUDA = cfg["train"]["cuda"].lower() == "true"
+USE_CUDA = cfg["train"]["use_cuda"].lower() == "true"
 BATCH_SIZE = int(cfg["train"]["batch_size"])
 EPOCHS = int(cfg["train"]["epochs"])
 
@@ -39,13 +41,13 @@ def train():
     # Load data.
     print("Load data...")
     train_dataset = CustomDataset(file=TRAIN_FILE,
-                                max_len=MAX_LEN,
-                                min_count=MIN_COUNT,
-                                result_dir=RESULT_DIR)
+                                  max_len=MAX_LEN,
+                                  min_count=MIN_COUNT,
+                                  result_dir=RESULT_DIR)
     test_dataset = CustomDataset(file=TEST_FILE,
-                               max_len=MAX_LEN,
-                               min_count=MIN_COUNT,
-                               result_dir=RESULT_DIR)
+                                 max_len=MAX_LEN,
+                                 min_count=MIN_COUNT,
+                                 result_dir=RESULT_DIR)
     train_loader = DataLoader(train_dataset,
                               batch_size=BATCH_SIZE,
                               shuffle=True)

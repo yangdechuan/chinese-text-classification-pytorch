@@ -10,19 +10,19 @@ PAD = 0
 UNK = 1
 
 
-
 def _clean_str(string):
     string = string.replace(",", "，")
     return string.strip()
 
 
-def make_data(train_file, result_dir="results"):
+def make_data(train_file, result_dir="results", text_col_name="text"):
     """Build vocab dict.
     Write vocab and num to results/vocab.txt
 
     Arguments:
         train_file: train data file path.
-        result_dir: vocab dict directory
+        result_dir: vocab dict directory.
+        text_col_name: column name for text.
     """
     if not os.path.exists(result_dir):
         os.mkdir(result_dir)
@@ -32,7 +32,7 @@ def make_data(train_file, result_dir="results"):
 
     vocab2num = Counter()
     lengths = []
-    for sentence in df["text"]:
+    for sentence in df[text_col_name]:
         if sentence is None:
             continue
         sentence = _clean_str(sentence)
@@ -53,7 +53,7 @@ def make_data(train_file, result_dir="results"):
     print("Max Sentence Length {}".format(max(lengths)))
 
 
-def load_data(file, max_len=100, min_count=10, result_dir="results"):
+def load_data(file, max_len=100, min_count=10, result_dir="results", text_col_name="text", label_col_name="label"):
     """Load texts and labels for train or test.
 
     Arguments:
@@ -61,6 +61,8 @@ def load_data(file, max_len=100, min_count=10, result_dir="results"):
         max_len: Sequences longer than this will be filtered out, and shorter than this will be padded with PAD.
         min_count: Vocab num less than this will be replaced with UNK.
         result_dir: vocab dict dir
+        text_col_name: column name for text.
+        label_col_name: column name for label.
     Returns:
         X: numpy array with shape (data_size, max_len)
         y: numpy array with shape (data_size, )
@@ -72,7 +74,7 @@ def load_data(file, max_len=100, min_count=10, result_dir="results"):
     vocab_size = len(vocabs)
     df = pd.read_csv(file)
     x_list = []
-    for sentence in df["text"].values:
+    for sentence in df[text_col_name].values:
         sentence = _clean_str(sentence)
         x = [vocab2idx.get(vocab, UNK) for vocab in jieba.cut(sentence)]
         x = x[:max_len]
@@ -82,18 +84,20 @@ def load_data(file, max_len=100, min_count=10, result_dir="results"):
     X = np.array(x_list, dtype=np.int64)
     print("{} Data size {}".format("Train" if "train" in file else "Test",  len(X)))
 
-    y = df["label"].values.astype(np.int64) if "label" in df.columns else None
+    y = df[label_col_name].values.astype(np.int64) if "label" in df.columns else None
     return X, y, vocab_size
 
 
 class CustomDataset(Dataset):
     """Custom Dataset for PyTorch."""
-    def __init__(self, file, max_len=100, min_count=10, result_dir="results"):
+    def __init__(self, file, max_len=100, min_count=10, result_dir="results", text_col_name="text", label_col_name="label"):
         super(CustomDataset, self).__init__()
         self.X, self.y, self.vocab_size = load_data(file,
                                                     max_len=max_len,
                                                     min_count=min_count,
-                                                    result_dir=result_dir)
+                                                    result_dir=result_dir,
+                                                    text_col_name=text_col_name,
+                                                    label_col_name=label_col_name)
 
     def __getitem__(self, index):
         return self.X[index], self.y[index]
