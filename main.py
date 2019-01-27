@@ -19,7 +19,7 @@ PREDICT_FILE = cfg["file"]["predict_file"].replace("/", os.path.sep)
 MODEL_DIR = cfg["file"]["model_dir"].replace("/", os.path.sep)
 RESULT_DIR = cfg["file"]["result_dir"].replace("/", os.path.sep)
 TEXT_COL_NAME = cfg["file"]["text_col_name"]
-LABEL_COL_NAME = cfg["file"]["text_col_name"]
+LABEL_COL_NAME = cfg["file"]["label_col_name"]
 
 USE_CUDA = cfg["train"]["use_cuda"].lower() == "true"
 BATCH_SIZE = int(cfg["train"]["batch_size"])
@@ -43,11 +43,15 @@ def train():
     train_dataset = CustomDataset(file=TRAIN_FILE,
                                   max_len=MAX_LEN,
                                   min_count=MIN_COUNT,
-                                  result_dir=RESULT_DIR)
+                                  result_dir=RESULT_DIR,
+                                  text_col_name=TEXT_COL_NAME,
+                                  label_col_name=LABEL_COL_NAME)
     test_dataset = CustomDataset(file=TEST_FILE,
                                  max_len=MAX_LEN,
                                  min_count=MIN_COUNT,
-                                 result_dir=RESULT_DIR)
+                                 result_dir=RESULT_DIR,
+                                 text_col_name=TEXT_COL_NAME,
+                                 label_col_name=LABEL_COL_NAME)
     train_loader = DataLoader(train_dataset,
                               batch_size=BATCH_SIZE,
                               shuffle=True)
@@ -132,7 +136,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.make_vocab:
-        make_vocab(train_file=TRAIN_FILE, result_dir=RESULT_DIR)
+        make_vocab(train_file=TRAIN_FILE, result_dir=RESULT_DIR, text_col_name=TEXT_COL_NAME)
     if args.do_train:
         train()
     if args.do_predict:

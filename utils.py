@@ -15,7 +15,7 @@ def _clean_str(string):
     return string.strip()
 
 
-def make_vocab(train_file, result_dir="results", text_col_name="text"):
+def make_vocab(train_file, result_dir="results", text_col_name=None):
     """Build vocab dict.
     Write vocab and num to results/vocab.txt
 
@@ -58,7 +58,7 @@ def make_vocab(train_file, result_dir="results", text_col_name="text"):
     print("Max Sentence Length {}".format(max(lengths)))
 
 
-def load_data(file, max_len=100, min_count=10, result_dir="results", text_col_name="text", label_col_name="label"):
+def load_data(file, max_len=100, min_count=10, result_dir="results", text_col_name=None, label_col_name=None):
     """Load texts and labels for train or test.
 
     Arguments:
@@ -107,8 +107,8 @@ class CustomDataset(Dataset):
                  max_len=100,
                  min_count=10,
                  result_dir="results",
-                 text_col_name="text",
-                 label_col_name="label"):
+                 text_col_name=None,
+                 label_col_name=None):
         super(CustomDataset, self).__init__()
         self.X, self.y, self.vocab_size = load_data(file,
                                                     max_len=max_len,
