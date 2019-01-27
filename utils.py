@@ -15,7 +15,7 @@ def _clean_str(string):
     return string.strip()
 
 
-def make_data(train_file, result_dir="results", text_col_name="text"):
+def make_vocab(train_file, result_dir="results", text_col_name="text"):
     """Build vocab dict.
     Write vocab and num to results/vocab.txt
 

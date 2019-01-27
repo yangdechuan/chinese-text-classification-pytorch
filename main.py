@@ -7,7 +7,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
-from utils import CustomDataset, make_data, load_data
+from utils import CustomDataset, make_vocab, load_data
 from cnn import CNNTextModel
 
 cfg = configparser.ConfigParser()
@@ -120,14 +120,20 @@ def predict(epoch_idx):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", type=str, default="preprocess", choices=["preprocess", "train", "predict"])
-    parser.add_argument("--epoch-idx", type=int, default=1)
+    parser.add_argument("--make-vocab", action="store_true",
+                        help="Set this flag if you want to make vocab from train data.")
+    parser.add_argument("--do-train", action="store_true",
+                        help="Whether to run training.")
+    parser.add_argument("--do-predict", action="store_true",
+                        help="Whether to run prediction.")
+    parser.add_argument("--epoch-idx", type=int, default=1,
+                        help="Choose which model to predict.")
 
     args = parser.parse_args()
 
-    if args.mode == "preprocess":
-        make_data(train_file=TRAIN_FILE, result_dir=RESULT_DIR)
-    elif args.mode == "train":
+    if args.make_vocab:
+        make_vocab(train_file=TRAIN_FILE, result_dir=RESULT_DIR)
+    if args.do_train:
         train()
-    else:
+    if args.do_predict:
         predict(args.epoch_idx)
