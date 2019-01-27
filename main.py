@@ -112,7 +112,8 @@ def predict(epoch_idx):
     X, _, _ = load_data(PREDICT_FILE,
                         max_len=MAX_LEN,
                         min_count=MIN_COUNT,
-                        result_dir=RESULT_DIR)
+                        result_dir=RESULT_DIR,
+                        text_col_name=TEXT_COL_NAME)
     X = torch.from_numpy(X).to(device)  # (N, L)
     out = model(X)  # (N, num_classes)
     pred = out.argmax(dim=-1)  # (N, )
