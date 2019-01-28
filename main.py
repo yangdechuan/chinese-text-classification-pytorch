@@ -62,7 +62,7 @@ def train():
                               shuffle=True)
     test_loader = DataLoader(test_dataset,
                              batch_size=BATCH_SIZE)
-    print("Load data success.")
+    print("Load data success!")
 
     vocab_size = len(vocab2idx)
 
@@ -75,6 +75,7 @@ def train():
     data_size = len(train_dataset)
     batch_num = data_size // BATCH_SIZE + 1
 
+    print("Training model..")
     for epoch in range(1, EPOCHS + 1):
         # Train model.
         model.train()

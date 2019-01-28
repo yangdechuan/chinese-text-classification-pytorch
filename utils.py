@@ -52,7 +52,7 @@ def make_vocab(train_file, result_dir="results", text_col_name=None):
         for vocab, num in vocab2num.most_common():
             fw.write("{}\t{}\n".format(vocab, num))
 
-    print("Vocab Size {}".format(len(vocab2num)))
+    print("All Vocab Size {}".format(len(vocab2num)))
     print("Train Data Size {}".format(len(lengths)))
     print("Average Sentence Length {}".format(sum(lengths) / len(lengths)))
     print("Max Sentence Length {}".format(max(lengths)))
@@ -92,8 +92,6 @@ def load_data(file, max_len=100,
     else:
         raise ValueError
 
-    df = df.sample(frac=1.0).reset_index(drop=True)
-
     x_list = []
     for sentence in df[text_col_name].values:
         sentence = _clean_str(sentence)
@@ -103,7 +101,7 @@ def load_data(file, max_len=100,
         x = x + n_pad * [PAD]  # pad with zero
         x_list.append(x)
     X = np.array(x_list, dtype=np.int64)
-    print("{} Data size {}".format("Train" if "train" in file else "Test",  len(X)))
+    print("{} data size {}".format(file,  len(X)))
 
     if label_col_name:
         label2idx = {label: idx for idx, label in enumerate(class_names)}
