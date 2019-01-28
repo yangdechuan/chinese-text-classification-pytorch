@@ -20,6 +20,7 @@ MODEL_DIR = cfg["file"]["model_dir"].replace("/", os.path.sep)
 RESULT_DIR = cfg["file"]["result_dir"].replace("/", os.path.sep)
 TEXT_COL_NAME = cfg["file"]["text_col_name"]
 LABEL_COL_NAME = cfg["file"]["label_col_name"]
+CLASS_NAMES = eval(cfg["file"]["class_names"])
 
 USE_CUDA = cfg["train"]["use_cuda"].lower() == "true"
 BATCH_SIZE = int(cfg["train"]["batch_size"])
@@ -28,7 +29,6 @@ EPOCHS = int(cfg["train"]["epochs"])
 MAX_LEN = int(cfg["process"]["max_sentence_len"])
 MIN_COUNT = int(cfg["process"]["min_word_count"])
 
-NUM_CLASSES = int(cfg["model"]["num_classes"])
 EMBEDDING_DIM = int(cfg["model"]["embedding_dim"])
 
 
@@ -45,13 +45,15 @@ def train():
                                   min_count=MIN_COUNT,
                                   result_dir=RESULT_DIR,
                                   text_col_name=TEXT_COL_NAME,
-                                  label_col_name=LABEL_COL_NAME)
+                                  label_col_name=LABEL_COL_NAME,
+                                  class_names=CLASS_NAMES)
     test_dataset = CustomDataset(file=TEST_FILE,
                                  max_len=MAX_LEN,
                                  min_count=MIN_COUNT,
                                  result_dir=RESULT_DIR,
                                  text_col_name=TEXT_COL_NAME,
-                                 label_col_name=LABEL_COL_NAME)
+                                 label_col_name=LABEL_COL_NAME,
+                                 class_names=CLASS_NAMES)
     train_loader = DataLoader(train_dataset,
                               batch_size=BATCH_SIZE,
                               shuffle=True)
@@ -64,7 +66,7 @@ def train():
     # Build model.
     model = CNNTextModel(vocab_size=vocab_size,
                          embedding_dim=EMBEDDING_DIM,
-                         num_classes=NUM_CLASSES)
+                         num_classes=len(CLASS_NAMES))
     model.to(device)
     optimizer = optim.Adam(model.parameters(), lr=1e-3)
     data_size = len(train_dataset)

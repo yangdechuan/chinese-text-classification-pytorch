@@ -58,7 +58,11 @@ def make_vocab(train_file, result_dir="results", text_col_name=None):
     print("Max Sentence Length {}".format(max(lengths)))
 
 
-def load_data(file, max_len=100, min_count=10, result_dir="results", text_col_name=None, label_col_name=None):
+def load_data(file, max_len=100, min_count=10,
+              result_dir="results",
+              text_col_name=None,
+              label_col_name=None,
+              class_names=None):
     """Load texts and labels for train or test.
 
     Arguments:
@@ -68,6 +72,7 @@ def load_data(file, max_len=100, min_count=10, result_dir="results", text_col_na
         result_dir: vocab dict dir
         text_col_name: column name for text.
         label_col_name: column name for label.
+        class_names: list of label name.
     Returns:
         X: numpy array with shape (data_size, max_len)
         y: numpy array with shape (data_size, )
@@ -96,7 +101,12 @@ def load_data(file, max_len=100, min_count=10, result_dir="results", text_col_na
     X = np.array(x_list, dtype=np.int64)
     print("{} Data size {}".format("Train" if "train" in file else "Test",  len(X)))
 
-    y = df[label_col_name].values.astype(np.int64) if label_col_name in df.columns else None
+    if label_col_name:
+        label2idx = {label: idx for idx, label in enumerate(class_names)}
+        y = [label2idx[label] for label in df[label_col_name].values]
+        y = np.array(y, dtype=np.int64)
+    else:
+        y = None
 
     return X, y, vocab_size
 
@@ -108,14 +118,16 @@ class CustomDataset(Dataset):
                  min_count=10,
                  result_dir="results",
                  text_col_name=None,
-                 label_col_name=None):
+                 label_col_name=None,
+                 class_names=None):
         super(CustomDataset, self).__init__()
         self.X, self.y, self.vocab_size = load_data(file,
                                                     max_len=max_len,
                                                     min_count=min_count,
                                                     result_dir=result_dir,
                                                     text_col_name=text_col_name,
-                                                    label_col_name=label_col_name)
+                                                    label_col_name=label_col_name,
+                                                    class_names=class_names)
 
     def __getitem__(self, index):
         return self.X[index], self.y[index]
