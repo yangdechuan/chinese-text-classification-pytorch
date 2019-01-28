@@ -2,6 +2,8 @@ import os
 import argparse
 import configparser
 
+import numpy as np
+from sklearn import metrics
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
@@ -93,16 +95,17 @@ def train():
 
         # Test model.
         model.eval()
-        total = 0
-        correct = 0
-        for batch_xs, batch_ys in test_loader:
+        y_pred = []
+        for batch_xs, _ in test_loader:
             batch_xs = batch_xs.to(device)  # (N, L)
-            batch_ys = batch_ys.to(device)  # (N, )
             batch_out = model(batch_xs)  # (N, num_classes)
             batch_pred = batch_out.argmax(dim=-1)  # (N, )
-            correct += (batch_ys == batch_pred).sum().item()
-            total += batch_ys.shape[0]
-        print("epoch {}, test accuracy {}%".format(epoch, correct / total * 100))
+            for i in batch_pred.cpu().numpy():
+                y_pred.append(i)
+        y_pred = np.array(y_pred, dtype=np.int64)
+        accuracy = metrics.accuracy_score(y_test, y_pred)
+        f1_socre = metrics.f1_score(y_test, y_pred, average="macro")
+        print("epoch {}, test accuracy {}, f1-score {}".format(epoch, accuracy, f1_socre))
 
 
 def predict(epoch_idx):
