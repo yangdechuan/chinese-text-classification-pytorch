@@ -58,8 +58,16 @@ def make_vocab(train_file, result_dir="results", text_col_name=None):
     print("Max Sentence Length {}".format(max(lengths)))
 
 
-def load_data(file, max_len=100, min_count=10,
-              result_dir="results",
+def get_vocab(result_dir="results", min_count=1):
+    with open(os.path.join(result_dir, "vocab.txt"), "r", encoding="utf-8") as fr:
+        vocabs = [line.split()[0] for line in fr.readlines() if int(line.split()[1]) >= min_count]
+    vocab2idx = {vocab: idx for idx, vocab in enumerate(vocabs)}
+    print("used vocab size {}".format(len(vocab2idx)))
+    return vocab2idx
+
+
+def load_data(file, max_len=100,
+              vocab2idx=None,
               text_col_name=None,
               label_col_name=None,
               class_names=None):
@@ -68,8 +76,7 @@ def load_data(file, max_len=100, min_count=10,
     Arguments:
         file: data file path.
         max_len: Sequences longer than this will be filtered out, and shorter than this will be padded with PAD.
-        min_count: Vocab num less than this will be replaced with UNK.
-        result_dir: vocab dict dir
+        vocab2idx: dict. e.g. {"你好": 1, "世界": 7, ...}
         text_col_name: column name for text.
         label_col_name: column name for label.
         class_names: list of label name.
@@ -78,17 +85,14 @@ def load_data(file, max_len=100, min_count=10,
         y: numpy array with shape (data_size, )
         vocab_size: a scalar
     """
-    with open(os.path.join(result_dir, "vocab.txt"), "r", encoding="utf-8") as fr:
-        vocabs = [line.split()[0] for line in fr.readlines() if int(line.split()[1]) >= min_count]
-    vocab2idx = {vocab: idx for idx, vocab in enumerate(vocabs)}
-    vocab_size = len(vocabs)
-
     if file[-4:] == ".csv":
         df = pd.read_csv(file)
     elif file[-5:] == ".xlsx":
         df = pd.read_excel(file)
     else:
         raise ValueError
+
+    df = df.sample(frac=1.0).reset_index(drop=True)
 
     x_list = []
     for sentence in df[text_col_name].values:
@@ -108,32 +112,4 @@ def load_data(file, max_len=100, min_count=10,
     else:
         y = None
 
-    return X, y, vocab_size
-
-
-class CustomDataset(Dataset):
-    """Custom Dataset for PyTorch."""
-    def __init__(self, file,
-                 max_len=100,
-                 min_count=10,
-                 result_dir="results",
-                 text_col_name=None,
-                 label_col_name=None,
-                 class_names=None):
-        super(CustomDataset, self).__init__()
-        self.X, self.y, self.vocab_size = load_data(file,
-                                                    max_len=max_len,
-                                                    min_count=min_count,
-                                                    result_dir=result_dir,
-                                                    text_col_name=text_col_name,
-                                                    label_col_name=label_col_name,
-                                                    class_names=class_names)
-
-    def __getitem__(self, index):
-        return self.X[index], self.y[index]
-
-    def __len__(self):
-        return self.X.shape[0]
-
-    def get_vocab_size(self):
-        return self.vocab_size
+    return X, y

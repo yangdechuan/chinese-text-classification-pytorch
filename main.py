@@ -5,9 +5,9 @@ import configparser
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, TensorDataset
 
-from utils import CustomDataset, make_vocab, load_data
+from utils import make_vocab, get_vocab, load_data
 from cnn import CNNTextModel
 
 cfg = configparser.ConfigParser()
@@ -40,20 +40,21 @@ def train():
 
     # Load data.
     print("Load data...")
-    train_dataset = CustomDataset(file=TRAIN_FILE,
-                                  max_len=MAX_LEN,
-                                  min_count=MIN_COUNT,
-                                  result_dir=RESULT_DIR,
-                                  text_col_name=TEXT_COL_NAME,
-                                  label_col_name=LABEL_COL_NAME,
-                                  class_names=CLASS_NAMES)
-    test_dataset = CustomDataset(file=TEST_FILE,
+    vocab2idx = get_vocab(result_dir=RESULT_DIR, min_count=MIN_COUNT)
+    X_train, y_train = load_data(file=TRAIN_FILE,
                                  max_len=MAX_LEN,
-                                 min_count=MIN_COUNT,
-                                 result_dir=RESULT_DIR,
+                                 vocab2idx=vocab2idx,
                                  text_col_name=TEXT_COL_NAME,
                                  label_col_name=LABEL_COL_NAME,
                                  class_names=CLASS_NAMES)
+    X_test, y_test = load_data(file=TEST_FILE,
+                               max_len=MAX_LEN,
+                               vocab2idx=vocab2idx,
+                               text_col_name=TEXT_COL_NAME,
+                               label_col_name=LABEL_COL_NAME,
+                               class_names=CLASS_NAMES)
+    train_dataset = TensorDataset(torch.from_numpy(X_train), torch.from_numpy(y_train))
+    test_dataset = TensorDataset(torch.from_numpy(X_test), torch.from_numpy(y_test))
     train_loader = DataLoader(train_dataset,
                               batch_size=BATCH_SIZE,
                               shuffle=True)
@@ -61,7 +62,7 @@ def train():
                              batch_size=BATCH_SIZE)
     print("Load data success.")
 
-    vocab_size = train_dataset.get_vocab_size()
+    vocab_size = len(vocab2idx)
 
     # Build model.
     model = CNNTextModel(vocab_size=vocab_size,
@@ -84,8 +85,8 @@ def train():
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            if batch % 30 == 0:
-                print("epoch {}, batch {}/{}, train loss {}".format(epoch, batch, batch_num, loss.item()))
+            # if batch % 30 == 0:
+            #     print("epoch {}, batch {}/{}, train loss {}".format(epoch, batch, batch_num, loss.item()))
             batch += 1
         checkpoint_path = os.path.join(MODEL_DIR, "model_epoch_{}.ckpt".format(epoch))
         torch.save(model, checkpoint_path)
@@ -111,11 +112,11 @@ def predict(epoch_idx):
     model = torch.load(os.path.join(MODEL_DIR, "model_epoch_{}.ckpt".format(epoch_idx)))
     model = model.to(device)
 
-    X, _, _ = load_data(PREDICT_FILE,
-                        max_len=MAX_LEN,
-                        min_count=MIN_COUNT,
-                        result_dir=RESULT_DIR,
-                        text_col_name=TEXT_COL_NAME)
+    vocab2idx = get_vocab(result_dir=RESULT_DIR, min_count=MIN_COUNT)
+    X, _ = load_data(PREDICT_FILE,
+                     max_len=MAX_LEN,
+                     vocab2idx=vocab2idx,
+                     text_col_name=TEXT_COL_NAME)
     X = torch.from_numpy(X).to(device)  # (N, L)
     out = model(X)  # (N, num_classes)
     pred = out.argmax(dim=-1)  # (N, )
