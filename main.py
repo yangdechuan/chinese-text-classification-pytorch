@@ -5,8 +5,8 @@ import configparser
 import numpy as np
 from sklearn import metrics
 import torch
-import torch.optim as optim
-import torch.nn.functional as F
+import torch.nn as nn
+from torch import optim
 from torch.utils.data import DataLoader, TensorDataset
 
 from utils import make_vocab, get_vocab, load_data
@@ -76,6 +76,7 @@ def train():
     batch_num = data_size // BATCH_SIZE + 1
 
     print("Training model..")
+    criterion = nn.CrossEntropyLoss()
     for epoch in range(1, EPOCHS + 1):
         # Train model.
         model.train()
@@ -84,7 +85,7 @@ def train():
             batch_xs = batch_xs.to(device)  # (N, L)
             batch_ys = batch_ys.to(device)  # (N, )
             batch_out = model(batch_xs)  # (N, num_classes)
-            loss = F.cross_entropy(batch_out, batch_ys)
+            loss = criterion(batch_out, batch_ys)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
